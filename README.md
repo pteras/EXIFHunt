@@ -43,16 +43,16 @@ EXIFHunt is a lightweight script designed to extract and organize EXIF data from
 3. **Run the application:**
 
     ```sh
-    python metamapper.py
+    python main.py
     ```
 
 ## Requirements
 
 - Python 3.x
-- `Pillow` for image processing
-- `hachoir` for video metadata extraction
-- `FPDF` for PDF report generation
-- `tkinter` for the graphical user interface
+- [Pillow](https://python-pillow.org/)
+- [hachoir](https://github.com/vstinner/hachoir)
+- [FPDF](http://www.fpdf.org/)
+- [customtkinter](https://github.com/TomSchimansky/CustomTkinter)
 
 ## Screenshots
 
@@ -63,11 +63,6 @@ EXIFHunt is a lightweight script designed to extract and organize EXIF data from
 ## Contributing
 
 Please fork this repository and submit a pull request with your improvements.
-
-- [Pillow](https://python-pillow.org/)
-- [hachoir](https://github.com/vstinner/hachoir)
-- [FPDF](http://www.fpdf.org/)
-- [customtkinter](https://github.com/TomSchimansky/CustomTkinter)
 
 ## License
 

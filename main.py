@@ -1,12 +1,13 @@
 import os
 import datetime
-from tkinter import Tk, StringVar, filedialog, messagebox
+from tkinter import StringVar, filedialog, messagebox
 import customtkinter as ctk
 from PIL import Image
 from PIL.ExifTags import TAGS
 from hachoir.metadata import extractMetadata
 from hachoir.parser import createParser
 from fpdf import FPDF
+import webbrowser
 
 # Functions to extract EXIF data
 def extract_exif(image_path):
@@ -52,9 +53,8 @@ class PDFReport(FPDF):
 
 def create_pdf_report(exif_data, output_directory):
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    output_path = os.path.join(output_directory, f'metamapper_{timestamp}.pdf')
+    output_path = os.path.join(output_directory, f'exif_{timestamp}.pdf')
 
-    # Create the directory if it doesn't exist
     os.makedirs(output_directory, exist_ok=True)
 
     pdf = PDFReport()
@@ -70,7 +70,7 @@ def create_pdf_report(exif_data, output_directory):
 
 def create_text_report(exif_data, output_directory):
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    output_path = os.path.join(output_directory, f'metamapper_{timestamp}.txt')
+    output_path = os.path.join(output_directory, f'exif_{timestamp}.txt')
     os.makedirs(output_directory, exist_ok=True)
 
     with open(output_path, 'w') as file:
@@ -107,13 +107,20 @@ def generate_report():
     exif_data = get_exif_data(directory, process_images, process_videos)
     
     if output_format == 1:
-        output_path = os.path.join(output_directory, 'exif_report.pdf')
-        create_pdf_report(exif_data, output_path)
+        output_path = create_pdf_report(exif_data, output_directory)
     elif output_format == 2:
-        output_path = os.path.join(output_directory, 'exif_report.txt')
-        create_text_report(exif_data, output_path)
+        output_path = create_text_report(exif_data, output_directory)
     
     messagebox.showinfo("Success", f"Report generated: {output_path}")
+    
+    if open_report_var.get():
+        open_report(output_path)
+
+def open_report(output_path):
+    if os.path.exists(output_path):
+        webbrowser.open(output_path)
+    else:
+        messagebox.showerror("Error", "The report file does not exist.")
 
 def select_folder():
     folder = filedialog.askdirectory()
@@ -122,9 +129,7 @@ def select_folder():
         messagebox.showerror("Error", "The folder contains no compatible images/videos.")
 
 def contains_compatible_files(directory):
-    # Supported image extensions
     image_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff')
-    # Supported video extensions
     video_extensions = ('.mp4', '.mov', '.avi', '.mkv', '.wmv', '.flv')
     for filename in os.listdir(directory):
         if filename.lower().endswith(image_extensions) or filename.lower().endswith(video_extensions):
@@ -135,37 +140,73 @@ def select_output_folder():
     folder = filedialog.askdirectory()
     output_folder_path.set(folder)
 
-# Themes
+# Theme
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-# Setting up the customTkinter window
+# CustomTkinter window
 root = ctk.CTk()
-root.title("MetaMapper")
+root.title("EXIFHunt v1.1")
+root.iconbitmap('assets\icon.ico')
+root.geometry("450x400")
+root.resizable(True, True)
+
+# Adjust for responsiveness
+root.update_idletasks()
+screen_width = root.winfo_screenwidth()
+screen_height = root.winfo_screenheight()
+window_width = 450
+window_height = 400  
+x_position = (screen_width - window_width) // 2
+y_position = (screen_height - window_height) // 2
+root.geometry(f"{window_width}x{window_height}+{x_position}+{y_position}")
+
+ctk.CTkLabel(root, text="2025 v1.1 @pteras", font=("Arial", 10), text_color="gray").grid(row=5, column=0, sticky="w", padx=10, pady=10)
 
 folder_path = StringVar(value=os.path.dirname(__file__))
-output_folder_path = output_folder_path = StringVar(value=os.path.join(os.path.dirname(__file__), "reports"))
+output_folder_path = StringVar(value=os.path.join(os.path.dirname(__file__), "reports"))
 images_var = ctk.BooleanVar()
 videos_var = ctk.BooleanVar()
 output_format_var = ctk.IntVar()
+open_report_var = ctk.BooleanVar(value=False)
 
-# Create widgets
-ctk.CTkLabel(master=root, text="Select Folder:").grid(row=0, column=0, padx=10, pady=10, sticky="e")
-ctk.CTkEntry(root, textvariable=folder_path, width=50).grid(row=0, column=1, padx=10, pady=10)
-ctk.CTkButton(root, text="Browse", command=select_folder).grid(row=0, column=2, padx=10, pady=10)
+# Tabs
+tab_view = ctk.CTkTabview(root)
+tab_view.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
 
-ctk.CTkLabel(master=root, text="Output Folder:").grid(row=1, column=0, padx=10, pady=10, sticky="e")
-ctk.CTkEntry(root, textvariable=output_folder_path, width=50).grid(row=1, column=1, padx=10, pady=10)
-ctk.CTkButton(root, text="Browse", command=select_output_folder).grid(row=1, column=2, padx=10, pady=10)
+# Generate 
+tab_generate = tab_view.add("Generate")
+ctk.CTkLabel(master=tab_generate, text="Select Media:").grid(row=0, column=0, padx=10, pady=10, sticky="e")
 
-ctk.CTkLabel(master=root, text="Select File Types:").grid(row=2, column=0, padx=10, pady=10, sticky="e")
-ctk.CTkCheckBox(root, text="Images", variable=images_var).grid(row=2, column=1, sticky="w")
-ctk.CTkCheckBox(root, text="Videos", variable=videos_var).grid(row=2, column=2, sticky="w")
+ctk.CTkEntry(tab_generate, textvariable=folder_path).grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+ctk.CTkButton(tab_generate, text="Browse", command=select_folder).grid(row=0, column=2, padx=10, pady=10)
 
-ctk.CTkLabel(master=root, text="Select Output Format:").grid(row=3, column=0, padx=10, pady=10, sticky="e")
-ctk.CTkRadioButton(root, text="PDF", variable=output_format_var, value=1).grid(row=3, column=1, sticky="w")
-ctk.CTkRadioButton(root, text="Text", variable=output_format_var, value=2).grid(row=3, column=2, sticky="w")
+ctk.CTkLabel(master=tab_generate, text="Output Folder:").grid(row=1, column=0, padx=10, pady=10, sticky="e")
+ctk.CTkEntry(tab_generate, textvariable=output_folder_path).grid(row=1, column=1, padx=10, pady=10, sticky="ew")
+ctk.CTkButton(tab_generate, text="Browse", command=select_output_folder).grid(row=1, column=2, padx=10, pady=10)
 
-ctk.CTkButton(root, text="Generate Report", command=generate_report).grid(row=4, column=0, columnspan=3, pady=20)
+ctk.CTkLabel(master=tab_generate, text="File Types:").grid(row=2, column=0, padx=10, pady=10, sticky="e")
+ctk.CTkCheckBox(tab_generate, text="Images", variable=images_var).grid(row=2, column=1, sticky="w")
+ctk.CTkCheckBox(tab_generate, text="Videos", variable=videos_var).grid(row=2, column=2, sticky="w")
+
+ctk.CTkLabel(master=tab_generate, text="Save As:").grid(row=3, column=0, padx=10, pady=10, sticky="e")
+ctk.CTkRadioButton(tab_generate, text="PDF", variable=output_format_var, value=1).grid(row=3, column=1, sticky="w")
+ctk.CTkRadioButton(tab_generate, text="Text", variable=output_format_var, value=2).grid(row=3, column=2, sticky="w")
+
+ctk.CTkCheckBox(tab_generate, text="Open Report Once Ready", variable=open_report_var).grid(row=4, column=0, columnspan=3, pady=10)
+
+ctk.CTkButton(tab_generate, text="Generate EXIF Report", command=generate_report).grid(row=5, column=0, columnspan=3, pady=20)
+
+# Settings tab
+tab_settings = tab_view.add("Settings")
+ctk.CTkLabel(tab_settings, text="Coming soon...", justify="center").grid(row=0, column=0, padx=10, pady=10)
+
+# About tab
+tab_about = tab_view.add("About")
+ctk.CTkLabel(tab_about, text="EXIFHunt v1.1\n\nA tool for extracting EXIF metadata from images and videos and generating reports.\n\nDeveloped by @pteras", justify="center").grid(row=0, column=0, padx=10, pady=10)
+
+# Grid layout for the window
+root.grid_rowconfigure(0, weight=1)
+root.grid_columnconfigure(0, weight=1)
 
 root.mainloop()
