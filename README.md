@@ -30,8 +30,8 @@ EXIFHunt is a lightweight script designed to extract and organize EXIF data from
 1. **Clone the repository:**
 
     ```sh
-    git clone https://github.com/pteras/MetaMapper.git
-    cd MetaMapper
+    git clone https://github.com/pteras/EXIFHunt.git
+    cd EXIFHunt
     ```
 
 2. **Install the required dependencies:**
