@@ -56,9 +56,9 @@ EXIFHunt is a lightweight script designed to extract and organize EXIF data from
 
 ## Screenshots
 
-![EXIFHunt](https://github.com/user-attachments/assets/90bcb9ea-65ea-47fc-b647-62733bfe6f74)
+![EXIFHunt](https://github.com/user-attachments/assets/05ea5a1a-bc9f-479d-82ac-e8cb3c68af4e)
 
-![Example Report Output](https://github.com/user-attachments/assets/bfaa0b21-3bff-4827-8cf7-83deb84e05b1)
+![Example Report Output](https://github.com/user-attachments/assets/d37393ef-da2a-4df2-8981-e6e54444fcc2)
 
 ## Contributing
 
