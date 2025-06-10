@@ -1,6 +1,6 @@
 # EXIFHunt
 
-EXIFHunt is a lightweight script designed to extract and organize EXIF data from images and videos.
+EXIFHunt is a lightweight python script designed to extract and organize EXIF data from images and videos. Now with GUI!
 
 ## Features
 
